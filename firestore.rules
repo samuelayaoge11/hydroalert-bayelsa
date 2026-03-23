@@ -1,0 +1,208 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (Firebase Auth UID)
+    // Fields:
+    //   - fullName: string (required, 1-100 chars)
+    //   - phoneNumber: string (required, valid format)
+    //   - role: string (required, enum: ['admin', 'operator', 'citizen'])
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: sensor_nodes
+    // Document ID: nodeId
+    // Fields:
+    //   - locationName: string (required, 1-100 chars)
+    //   - latitude: number (required, -90 to 90)
+    //   - longitude: number (required, -180 to 180)
+    //   - elevationBaseline: number (required)
+    //   - warningThreshold: number (required)
+    //   - criticalThreshold: number (required)
+    //   - status: string (required, enum: ['active', 'offline', 'maintenance'])
+    //
+    // Collection: sensor_nodes/{nodeId}/telemetry
+    // Document ID: telemetryId
+    // Fields:
+    //   - time: timestamp (required)
+    //   - nodeId: string (required)
+    //   - waterLevel: number (required)
+    //   - batteryVoltage: number (optional)
+    //   - signalStrength: number (optional)
+    //   - isSimulated: bool (required)
+    //
+    // Collection: regulations
+    // Document ID: regulationId
+    // Fields:
+    //   - title: string (required, 1-200 chars)
+    //   - description: string (required)
+    //   - penaltyClause: string (required)
+    //   - applicableNodeId: string (optional)
+    //
+    // Collection: alert_logs
+    // Document ID: alertId
+    // Fields:
+    //   - nodeId: string (required)
+    //   - alertLevel: string (required, enum: ['warning', 'critical', 'resolved'])
+    //   - message: string (required)
+    //   - isSimulated: bool (required)
+    //   - timestamp: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "ayaogesamuel@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isOperator() {
+      return isAuthenticated() &&
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'operator' || isAdmin());
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    function isRecent(time) {
+      return time > request.time - duration.value(5, 'm') && time < request.time + duration.value(5, 'm');
+    }
+
+    function fieldUnchanged(field) {
+      return !(field in request.resource.data) || request.resource.data[field] == resource.data[field];
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['fullName', 'phoneNumber', 'role', 'createdAt']) &&
+             hasOnlyAllowedFields(['fullName', 'phoneNumber', 'role', 'createdAt']) &&
+             data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 100 &&
+             data.phoneNumber is string && data.phoneNumber.size() >= 5 && data.phoneNumber.size() <= 20 &&
+             data.role in ['admin', 'operator', 'citizen'] &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidSensorNode(data) {
+      return hasRequiredFields(['locationName', 'lga', 'community', 'latitude', 'longitude', 'elevationBaseline', 'warningThreshold', 'criticalThreshold', 'status']) &&
+             hasOnlyAllowedFields(['locationName', 'lga', 'community', 'latitude', 'longitude', 'elevationBaseline', 'warningThreshold', 'criticalThreshold', 'status']) &&
+             data.locationName is string && data.locationName.size() >= 1 && data.locationName.size() <= 100 &&
+             data.lga is string && data.lga.size() >= 1 && data.lga.size() <= 100 &&
+             data.community is string && data.community.size() >= 1 && data.community.size() <= 100 &&
+             data.latitude is number && data.latitude >= -90 && data.latitude <= 90 &&
+             data.longitude is number && data.longitude >= -180 && data.longitude <= 180 &&
+             data.elevationBaseline is number &&
+             data.warningThreshold is number &&
+             data.criticalThreshold is number &&
+             data.status in ['active', 'offline', 'maintenance'];
+    }
+
+    function isValidTelemetry(data) {
+      return hasRequiredFields(['time', 'nodeId', 'waterLevel', 'isSimulated']) &&
+             hasOnlyAllowedFields(['time', 'nodeId', 'waterLevel', 'batteryVoltage', 'signalStrength', 'isSimulated']) &&
+             data.time is timestamp &&
+             data.nodeId is string &&
+             data.waterLevel is number &&
+             data.isSimulated is bool;
+    }
+
+    function isValidRegulation(data) {
+      return hasRequiredFields(['title', 'description', 'penaltyClause']) &&
+             hasOnlyAllowedFields(['title', 'description', 'penaltyClause', 'applicableNodeId']) &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 5000 &&
+             data.penaltyClause is string && data.penaltyClause.size() <= 1000;
+    }
+
+    function isValidAlertLog(data) {
+      return hasRequiredFields(['nodeId', 'alertLevel', 'message', 'isSimulated', 'timestamp']) &&
+             hasOnlyAllowedFields(['nodeId', 'alertLevel', 'message', 'isSimulated', 'timestamp']) &&
+             data.nodeId is string &&
+             data.alertLevel in ['warning', 'critical', 'resolved'] &&
+             data.message is string && data.message.size() <= 500 &&
+             data.isSimulated is bool &&
+             data.timestamp is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
+                      isRecent(request.resource.data.createdAt) &&
+                      ((isOwner(userId) && request.resource.data.role == 'citizen') || isAdmin());
+      
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
+                      fieldUnchanged('createdAt') &&
+                      ((isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin());
+    }
+
+    match /sensor_nodes/{nodeId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isOperator() && isValidSensorNode(request.resource.data);
+      
+      match /telemetry/{telemetryId} {
+        allow read: if isAuthenticated();
+        allow create: if isOperator() && isValidTelemetry(request.resource.data) && isRecent(request.resource.data.time);
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    match /regulations/{regulationId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin() && isValidRegulation(request.resource.data);
+    }
+
+    match /alert_logs/{alertId} {
+      allow read: if isAuthenticated();
+      allow create: if isOperator() && isValidAlertLog(request.resource.data) && isRecent(request.resource.data.timestamp);
+      allow update, delete: if isAdmin();
+    }
+
+    // Connection test collection
+    match /test/connection {
+      allow read: if true; // Allow public read for connectivity check
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

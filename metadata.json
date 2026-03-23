@@ -1,0 +1,7 @@
+{
+  "name": "HydroAlert: Flood Monitoring & Drainage System",
+  "description": "Real-time water level monitoring, flood alerts, and drainage regulation management for local communities.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

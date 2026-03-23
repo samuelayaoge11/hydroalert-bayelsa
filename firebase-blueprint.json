@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Stores user profiles and roles.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "description": "The user's full name." },
+        "phoneNumber": { "type": "string", "description": "The user's phone number for SMS alerts." },
+        "role": { "type": "string", "enum": ["admin", "operator", "citizen"], "description": "The user's role in the system." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the user account was created." }
+      },
+      "required": ["fullName", "phoneNumber", "role", "createdAt"]
+    },
+    "SensorNode": {
+      "title": "SensorNode",
+      "description": "Maps physical or simulated hardware nodes.",
+      "type": "object",
+      "properties": {
+        "locationName": { "type": "string", "description": "The name of the location." },
+        "lga": { "type": "string", "description": "The Local Government Area." },
+        "community": { "type": "string", "description": "The specific community or ward." },
+        "latitude": { "type": "number", "description": "The latitude of the node." },
+        "longitude": { "type": "number", "description": "The longitude of the node." },
+        "elevationBaseline": { "type": "number", "description": "The normal dry-season water level." },
+        "warningThreshold": { "type": "number", "description": "Level triggering local warnings." },
+        "criticalThreshold": { "type": "number", "description": "Level triggering evacuation/SMS alerts." },
+        "status": { "type": "string", "enum": ["active", "offline", "maintenance"], "description": "The current status of the node." }
+      },
+      "required": ["locationName", "lga", "community", "latitude", "longitude", "elevationBaseline", "warningThreshold", "criticalThreshold", "status"]
+    },
+    "TelemetryData": {
+      "title": "TelemetryData",
+      "description": "High-frequency water level readings.",
+      "type": "object",
+      "properties": {
+        "time": { "type": "string", "format": "date-time", "description": "The timestamp of the reading." },
+        "nodeId": { "type": "string", "description": "The ID of the sensor node." },
+        "waterLevel": { "type": "number", "description": "The actual water level reading in meters." },
+        "batteryVoltage": { "type": "number", "description": "The battery voltage of the node." },
+        "signalStrength": { "type": "number", "description": "The GSM signal strength." },
+        "isSimulated": { "type": "boolean", "description": "Whether the reading is simulated." }
+      },
+      "required": ["time", "nodeId", "waterLevel", "isSimulated"]
+    },
+    "Regulation": {
+      "title": "Regulation",
+      "description": "Drainage and waste disposal regulations.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the regulation." },
+        "description": { "type": "string", "description": "The description of the regulation." },
+        "penaltyClause": { "type": "string", "description": "The penalty for non-compliance." },
+        "applicableNodeId": { "type": "string", "description": "Optional ID of a specific node this regulation applies to." }
+      },
+      "required": ["title", "description", "penaltyClause"]
+    },
+    "AlertLog": {
+      "title": "AlertLog",
+      "description": "Records of triggered alerts.",
+      "type": "object",
+      "properties": {
+        "nodeId": { "type": "string", "description": "The ID of the sensor node." },
+        "alertLevel": { "type": "string", "enum": ["warning", "critical", "resolved"], "description": "The severity level of the alert." },
+        "message": { "type": "string", "description": "The alert message." },
+        "isSimulated": { "type": "boolean", "description": "Whether the alert was simulated." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the alert was triggered." }
+      },
+      "required": ["nodeId", "alertLevel", "message", "isSimulated", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents."
+    },
+    "/sensor_nodes/{nodeId}": {
+      "schema": "SensorNode",
+      "description": "Sensor node configuration documents."
+    },
+    "/sensor_nodes/{nodeId}/telemetry/{telemetryId}": {
+      "schema": "TelemetryData",
+      "description": "Telemetry readings for a specific node."
+    },
+    "/regulations/{regulationId}": {
+      "schema": "Regulation",
+      "description": "Global or node-specific regulations."
+    },
+    "/alert_logs/{alertId}": {
+      "schema": "AlertLog",
+      "description": "Global log of all alerts."
+    },
+    "/test/connection": {
+      "schema": { "type": "object", "properties": { "status": { "type": "string" } } },
+      "description": "Connection test document."
+    }
+  }
+}
