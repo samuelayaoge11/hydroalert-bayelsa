@@ -1,127 +1,155 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Bell, Shield, Smartphone, Trash2, LogOut, ChevronRight } from 'lucide-react';
-import { auth } from '../firebase';
+import React from "react";
+import {
+  Settings as SettingsIcon,
+  User,
+  Bell,
+  Shield,
+  LogOut,
+  Database,
+  Ruler,
+  ChevronRight,
+} from "lucide-react";
+import { auth } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
+  const user = auth.currentUser;
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      navigate("/"); // Redirect to login
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-4xl mx-auto">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6 text-slate-600" />
-        </button>
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Settings</h1>
-          <p className="text-slate-500">Manage your account and notification preferences</p>
-        </div>
+    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          System Settings
+        </h1>
+        <p className="text-slate-500">
+          Manage your profile, alerts, and system configurations
+        </p>
       </div>
 
-      <div className="space-y-6">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Account</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Profile Section */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-black">
+                {user?.email?.[0].toUpperCase()}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">
+                  {user?.displayName || "Authorized Engineer"}
+                </h3>
+                <p className="text-slate-500 text-sm">{user?.email}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">
+                  Account Role
+                </p>
+                <p className="text-sm font-bold text-slate-700">
+                  System Administrator
+                </p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">
+                  Project Access
+                </p>
+                <p className="text-sm font-bold text-slate-700">
+                  Bayelsa State Portal
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="divide-y divide-slate-100">
-            <button className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-all text-left group">
-              <div className="flex items-center gap-4">
-                <div className="bg-blue-50 p-2.5 rounded-2xl group-hover:bg-blue-600 transition-colors">
-                  <User className="w-5 h-5 text-blue-600 group-hover:text-white transition-colors" />
+
+          {/* System Preferences */}
+          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+              <Database className="w-5 h-5 text-blue-600" />
+              System Configuration
+            </h3>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-colors group cursor-pointer border border-transparent hover:border-slate-100">
+                <div className="flex items-center gap-4">
+                  <div className="bg-slate-100 p-2 rounded-lg group-hover:bg-white transition-colors">
+                    <Ruler className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">
+                      Measurement Units
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Display water levels in Meters (m)
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-slate-900">Profile Information</p>
-                  <p className="text-xs text-slate-500">Update your name and email address</p>
-                </div>
+                <ChevronRight className="w-4 h-4 text-slate-300" />
               </div>
-              <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-900 transition-all" />
-            </button>
-            <button className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-all text-left group">
-              <div className="flex items-center gap-4">
-                <div className="bg-purple-50 p-2.5 rounded-2xl group-hover:bg-purple-600 transition-colors">
-                  <Shield className="w-5 h-5 text-purple-600 group-hover:text-white transition-colors" />
+
+              <div className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-colors group cursor-pointer border border-transparent hover:border-slate-100">
+                <div className="flex items-center gap-4">
+                  <div className="bg-slate-100 p-2 rounded-lg group-hover:bg-white transition-colors">
+                    <Bell className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">
+                      Notification Channels
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Email and Browser Push enabled
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-slate-900">Security & Privacy</p>
-                  <p className="text-xs text-slate-500">Manage passwords and authentication</p>
-                </div>
+                <ChevronRight className="w-4 h-4 text-slate-300" />
               </div>
-              <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-900 transition-all" />
-            </button>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Notifications</h3>
-          </div>
-          <div className="divide-y divide-slate-100">
-            <div className="flex items-center justify-between p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-orange-50 p-2.5 rounded-2xl">
-                  <Bell className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <p className="font-bold text-slate-900">Push Notifications</p>
-                  <p className="text-xs text-slate-500">Receive alerts on your device</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-            <div className="flex items-center justify-between p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-green-50 p-2.5 rounded-2xl">
-                  <Smartphone className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-bold text-slate-900">SMS Alerts</p>
-                  <p className="text-xs text-slate-500">Emergency alerts via text message</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Danger Zone</h3>
-          </div>
-          <div className="divide-y divide-slate-100">
-            <button 
-              onClick={() => auth.signOut()}
-              className="w-full flex items-center justify-between p-6 hover:bg-red-50 transition-all text-left group"
+        {/* Action Sidebar */}
+        <div className="space-y-6">
+          <div className="bg-slate-900 p-8 rounded-3xl shadow-xl text-white">
+            <Shield className="w-10 h-10 text-blue-400 mb-4" />
+            <h3 className="font-bold text-lg mb-2">Security Audit</h3>
+            <p className="text-slate-400 text-sm mb-6">
+              Your session is protected by Firebase Identity Platform with
+              256-bit encryption.
+            </p>
+            <button
+              onClick={handleLogout}
+              className="w-full bg-red-500/10 border border-red-500/20 text-red-400 py-3 rounded-xl font-bold text-sm hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2"
             >
-              <div className="flex items-center gap-4">
-                <div className="bg-slate-50 p-2.5 rounded-2xl group-hover:bg-red-600 transition-colors">
-                  <LogOut className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors" />
-                </div>
-                <div>
-                  <p className="font-bold text-slate-900">Sign Out</p>
-                  <p className="text-xs text-slate-500">Log out of your account</p>
-                </div>
-              </div>
+              <LogOut className="w-4 h-4" />
+              Sign Out from Portal
             </button>
-            <button className="w-full flex items-center justify-between p-6 hover:bg-red-50 transition-all text-left group">
-              <div className="flex items-center gap-4">
-                <div className="bg-red-50 p-2.5 rounded-2xl group-hover:bg-red-600 transition-colors">
-                  <Trash2 className="w-5 h-5 text-red-600 group-hover:text-white transition-colors" />
-                </div>
-                <div>
-                  <p className="font-bold text-red-600">Delete Account</p>
-                  <p className="text-xs text-red-400">Permanently remove your account and data</p>
-                </div>
-              </div>
-            </button>
+          </div>
+
+          <div className="bg-blue-600 p-8 rounded-3xl shadow-xl text-white overflow-hidden relative">
+            <div className="relative z-10">
+              <h3 className="font-bold text-lg mb-2">Engineering Support</h3>
+              <p className="text-blue-100 text-sm mb-4">
+                Contact the technical team for node maintenance or sensor
+                calibration.
+              </p>
+              <a
+                href="mailto:support@hydroalert.gov"
+                className="text-xs font-black uppercase tracking-widest bg-white text-blue-600 px-4 py-2 rounded-lg inline-block"
+              >
+                Open Ticket
+              </a>
+            </div>
+            <SettingsIcon className="absolute -bottom-8 -right-8 w-32 h-32 text-blue-500 opacity-20 rotate-12" />
           </div>
         </div>
       </div>

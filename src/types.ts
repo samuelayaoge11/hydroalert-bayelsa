@@ -8,7 +8,7 @@ export interface SensorNode {
   elevationBaseline: number;
   warningThreshold: number;
   criticalThreshold: number;
-  status: 'active' | 'offline' | 'maintenance';
+  status: "active" | "offline" | "maintenance";
 }
 
 export interface TelemetryData {
@@ -21,17 +21,17 @@ export interface TelemetryData {
 }
 
 export interface Regulation {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   penaltyClause: string;
-  applicableNodeId?: string;
+  sourceUrl?: string; // Add this line
 }
 
 export interface AlertLog {
   id: string;
   nodeId: string;
-  alertLevel: 'warning' | 'critical' | 'resolved';
+  alertLevel: "warning" | "critical" | "resolved";
   message: string;
   isSimulated: boolean;
   timestamp: string;
