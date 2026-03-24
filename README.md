@@ -1,20 +1,66 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# HydroAlert Bayelsa: Intelligent Hydrological Monitoring & Early Warning System
 
-# Run and deploy your AI Studio app
+## 🌊 Overview
 
-This contains everything you need to run your app locally.
+HydroAlert Bayelsa is a real-time IoT-integrated web application designed to monitor water levels across the eight Local Government Areas (LGAs) of Bayelsa State. Built with a focus on disaster risk reduction, the system provides civil authorities and residents with live telemetry, flood risk visualizations, and a database of gazetted environmental regulations.
 
-View your app in AI Studio: https://ai.studio/apps/1defcb40-9060-4a30-b996-044764de962d
+### 📍 Regional Focus
 
-## Run Locally
+The system tracks sensor nodes deployed in high-risk communities including:
 
-**Prerequisites:**  Node.js
+- **Yenagoa:** Epie Creek, Amarata, Igbogene
+- **Brass:** Akassa, Okpoama, Twon-Brass
+- **Southern Ijaw:** Oporoma, Amassoma, Otuan
+- **Sagbama, Ekeremor, Ogbia, Nembe, and Kolokuma/Opokuma.**
 
+---
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🚀 Key Features
+
+- **Real-Time Telemetry:** Live data streaming of water levels using Firebase Firestore listeners, with 5-second polling intervals.
+- **Interactive Flood Map:** Geographic visualization using Leaflet.js, featuring color-coded status markers (Normal, Warning, Critical).
+- **Legal Compliance Database:** A searchable repository of official government regulations from **NESREA**, **NIHSA**, and **BSPPDB**.
+- **Early Warning Alerts:** Automated logging of critical water level breaches to trigger evacuation protocols.
+- **Responsive Dashboard:** Built with Tailwind CSS for seamless access across mobile and desktop devices.
+
+---
+
+## 🛠️ Technical Stack
+
+- **Frontend:** React 18, TypeScript, Vite
+- **State Management:** React Hooks (useEffect, useState)
+- **Backend & Database:** Firebase (Firestore, Authentication)
+- **Mapping:** React-Leaflet (OpenStreetMap API)
+- **Data Visualization:** Recharts (Area/Line trends)
+- **Icons:** Lucide-React
+
+---
+
+## ⚖️ Regulatory Framework
+
+This system incorporates official legal mandates to ensure administrative compliance:
+
+1.  **S.I. No. 26 of 2009:** National Environmental (Wetlands, River Banks and Lake Shores Protection) Regulations.
+2.  **Bayelsa State Physical Planning Act:** Section 42 (High-Risk Flood Zone Mandates).
+3.  **NIHSA Annual Flood Outlook (AFO):** Hydrological Peak Window Directives.
+
+---
+
+## ⚙️ Installation & Setup
+
+1. Clone the repository from the source link.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+Configure the environment:
+
+Create a .env file in the root directory.
+
+Add your Firebase API keys and project configuration.
+
+Start the development server:
+
+Bash
+npm run dev
